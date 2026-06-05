@@ -4,7 +4,14 @@ __pycache__/
 *.pyc
 *.log
 *.png
-*.html
+# Samo probe/debug HTML, ne templates
+probe_*.html
+debug_*.html
+wint_*.html
+ciak_*.html
+pq_*.html
+step*.html
+w_*.html
 probe_*.py
 debug_*.py
 test_*.py

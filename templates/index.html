@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katalog Delova</title>
+<style>
+  :root{--bg:#0f1117;--sb:#1a1d27;--card:#22263a;--border:#2e3347;--acc:#e8a100;--acc2:#3b82f6;--txt:#e2e8f0;--muted:#8892a4;--ok:#10b981;--err:#ef4444;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+  header{background:var(--sb);border-bottom:1px solid var(--border);padding:0 14px;height:48px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  header h1{font-size:16px;font-weight:700;color:var(--acc);}header h1 span{color:var(--txt);font-weight:400;}
+  .badge{font-size:11px;color:var(--muted);background:var(--card);padding:1px 7px;border-radius:4px;border:1px solid var(--border);}
+
+  .car-bar{background:var(--sb);border-bottom:1px solid var(--border);padding:6px 14px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex-shrink:0;}
+  select{background:var(--card);color:var(--txt);border:1px solid var(--border);border-radius:5px;padding:5px 9px;font-size:13px;min-width:140px;cursor:pointer;outline:none;}
+  select:focus{border-color:var(--acc);}select:disabled{opacity:.4;cursor:default;}
+  .sep{width:1px;height:22px;background:var(--border);margin:0 2px;}
+  .sgroup{display:flex;gap:5px;align-items:center;}
+  input[type=text]{background:var(--card);color:var(--txt);border:1px solid var(--border);border-radius:5px;padding:5px 9px;font-size:13px;width:135px;outline:none;}
+  input[type=text]:focus{border-color:var(--acc2);}input::placeholder{color:var(--muted);}
+  button{border:none;border-radius:5px;padding:5px 11px;font-size:12.5px;font-weight:600;cursor:pointer;transition:opacity .15s;}
+  button:hover{opacity:.85;}
+  .b-amber{background:var(--acc);color:#000;}.b-blue{background:var(--acc2);color:#fff;}
+  .b-ghost{background:var(--border);color:var(--txt);}.b-sm{padding:3px 8px;font-size:11.5px;}
+  .b-green{background:var(--ok);color:#fff;}
+
+  .mode-tabs{background:var(--sb);border-bottom:1px solid var(--border);display:flex;flex-shrink:0;}
+  .tab{padding:7px 15px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);}
+  .tab:hover{color:var(--txt);}
+  .tab.active{color:var(--acc);border-bottom-color:var(--acc);}
+
+  .layout{display:flex;flex:1;overflow:hidden;}
+
+  /* Sidebar */
+  .sidebar{width:235px;flex-shrink:0;background:var(--sb);border-right:1px solid var(--border);overflow-y:auto;padding:4px 0;}
+  .sb-title{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;padding:4px 11px 4px;}
+  .cat-item{padding:6px 11px;cursor:pointer;font-size:12.5px;border-left:3px solid transparent;display:flex;align-items:center;gap:5px;line-height:1.3;}
+  .cat-item:hover{background:rgba(255,255,255,.05);}
+  .cat-item.active{border-left-color:var(--acc);color:var(--acc);background:rgba(232,161,0,.07);font-weight:600;}
+  .cat-icon{font-size:13px;flex-shrink:0;}
+  .cat-children{padding-left:8px;display:none;}.cat-children.open{display:block;}
+  .cat-item.has-ch::after{content:'›';margin-left:auto;font-size:14px;transition:transform .2s;color:var(--muted);}
+  .cat-item.has-ch.open::after{transform:rotate(90deg);}
+  .sb-ph{color:var(--muted);font-size:12.5px;padding:18px 11px;text-align:center;}
+
+  /* Parts */
+  .main{flex:1;overflow-y:auto;padding:13px 15px;}
+  .mhdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:5px;}
+  .mhdr h2{font-size:15px;font-weight:600;}.rcnt{color:var(--muted);font-size:12px;}
+  .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:9px;}
+  .pcard{background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;gap:8px;padding:10px;transition:border-color .15s;}
+  .pcard:hover{border-color:var(--acc);}
+  .pimg{width:62px;height:62px;border-radius:5px;object-fit:contain;background:#14172a;flex-shrink:0;}
+  .pimg-ph{width:62px;height:62px;border-radius:5px;background:var(--sb);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+  .pinfo{flex:1;min-width:0;}
+  .pname{font-size:12.5px;font-weight:600;margin-bottom:2px;line-height:1.3;}
+  .pbrand{font-size:11px;color:var(--muted);margin-bottom:3px;}
+  .partnr{font-size:11px;color:#60a5fa;font-family:monospace;}
+  .oem-wrap{display:flex;flex-wrap:wrap;gap:3px;margin:3px 0;}
+  .oem-chip{background:rgba(59,130,246,.13);border:1px solid rgba(59,130,246,.28);color:#93c5fd;font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;font-family:monospace;cursor:pointer;white-space:nowrap;}
+  .oem-chip:hover{background:rgba(59,130,246,.28);}.oem-chip.cp{background:rgba(16,185,129,.13);border-color:rgba(16,185,129,.28);color:#6ee7b7;}
+  .pactions{margin-top:5px;display:flex;gap:4px;flex-wrap:wrap;}
+
+  /* Partsouq viewer */
+  .pq-view{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  #pq-iframe{flex:1;border:none;background:#fff;}
+  .pq-toolbar{background:var(--sb);border-bottom:1px solid var(--border);padding:6px 13px;display:flex;gap:7px;align-items:center;flex-shrink:0;flex-wrap:wrap;}
+  .pq-url{font-size:11px;color:var(--muted);font-family:monospace;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .pq-canvas-wrap{flex:1;overflow:hidden;position:relative;background:#1a1a2e;cursor:crosshair;}
+  #pq-canvas{display:block;width:100%;height:100%;object-fit:contain;image-rendering:crisp-edges;}
+  .pq-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .pq-loading{background:rgba(0,0,0,.6);color:#fff;border-radius:8px;padding:12px 20px;font-size:14px;display:none;}
+  .pq-hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.7);color:#e2e8f0;font-size:12px;padding:6px 14px;border-radius:20px;pointer-events:none;}
+
+  .vin-input-wrap{display:flex;gap:6px;align-items:center;margin-left:auto;}
+
+  .loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:45px;gap:9px;}
+  .spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loader p{color:var(--muted);font-size:13px;}
+  .empty{text-align:center;padding:45px;color:var(--muted);}
+  .empty .ico{font-size:38px;margin-bottom:8px;}
+  .empty h3{font-size:14px;margin-bottom:4px;color:var(--txt);}
+  .alert-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.22);color:#fca5a5;border-radius:6px;padding:8px 12px;font-size:12.5px;margin-bottom:10px;}
+
+  #toast{position:fixed;bottom:13px;right:13px;background:var(--ok);color:#fff;padding:7px 13px;border-radius:6px;font-size:12.5px;font-weight:600;opacity:0;transform:translateY(7px);transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;}
+  #toast.show{opacity:1;transform:none;}
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Katalog<span> Delova</span></h1>
+  <span class="badge">WINT + Partsouq</span>
+  <div style="margin-left:auto;display:flex;gap:6px;">
+    <button class="b-ghost b-sm" onclick="clearCache()">Briši keš</button>
+  </div>
+</header>
+
+<div class="car-bar">
+  <select id="sel-make" onchange="onMakeChange()"><option value="">-- Marka --</option></select>
+  <select id="sel-model" disabled onchange="onModelChange()"><option value="">-- Model --</option></select>
+  <select id="sel-type" disabled onchange="onTypeChange()"><option value="">-- Tip --</option></select>
+  <div class="sep"></div>
+  <div class="sgroup">
+    <input type="text" id="vin-bar" placeholder="VIN za WINT/Partsouq..."
+           onkeydown="if(event.key==='Enter')doVinAll()">
+    <button class="b-amber" onclick="doVinAll()">VIN →</button>
+  </div>
+</div>
+
+<div class="mode-tabs">
+  <div class="tab active" id="tab-parts" onclick="setMode('parts')">🔩 Lista dijelova (WINT)</div>
+  <div class="tab" id="tab-pq" onclick="setMode('pq')">🖼️ OEM Dijagram (Partsouq)</div>
+</div>
+
+<div class="layout">
+
+  <!-- Sidebar kategorija (samo parts mode) -->
+  <div class="sidebar" id="sidebar">
+    <div class="sb-ph"><div style="font-size:28px;margin-bottom:6px">🚗</div>Odaberi vozilo</div>
+  </div>
+
+  <!-- Parts lista -->
+  <div class="main" id="main">
+    <div class="empty">
+      <div class="ico">🔧</div>
+      <h3>Odaberi vozilo i kategoriju</h3>
+      <p style="font-size:12px;margin-top:4px">Lista dijelova + OEM brojevi iz WINT</p>
+    </div>
+  </div>
+
+  <!-- Partsouq viewer — direktan iframe -->
+  <div class="pq-view" id="pq-panel" style="display:none;">
+    <div class="pq-toolbar">
+      <button class="b-ghost b-sm" onclick="pqIframeBack()">← Nazad</button>
+      <button class="b-ghost b-sm" onclick="pqIframeRefresh()">↻</button>
+      <span class="pq-url" id="pq-url">partsouq.com</span>
+      <div class="vin-input-wrap">
+        <input type="text" id="pq-vin" placeholder="Ukucaj VIN/šasiju..."
+               style="width:180px" onkeydown="if(event.key==='Enter')pqSearchVin()">
+        <button class="b-amber" onclick="pqSearchVin()">Traži</button>
+      </div>
+    </div>
+    <div id="pq-empty-msg" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--muted);padding:40px;gap:10px;">
+      <div style="font-size:42px">🖼️</div>
+      <h3 style="color:var(--txt);font-size:15px">OEM Dijagrami — Partsouq</h3>
+      <p style="font-size:12px">Unesi VIN/šasiju gore i pritisni <strong>Traži</strong></p>
+      <p style="font-size:11px;color:#60a5fa">Originalni OEM eksplodirani dijagrami sa klikabilnim dijelovima</p>
+    </div>
+    <iframe id="pq-iframe" src="about:blank"
+            style="display:none;flex:1;border:none;background:#fff;"
+            allow="*" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const S = {
+  makeId:'', makeName:'', modelId:'', modelName:'',
+  vid:'', vMfr:'', vModel:'', vType:'', mode:'parts'
+};
+
+// ── API ────────────────────────────────────────────────────────────────────
+async function api(path) {
+  const r = await fetch(path);
+  const j = await r.json();
+  if (j && j.error) throw new Error(j.error);
+  return j;
+}
+async function pqApi(path, opts={}) {
+  // 90s timeout za partsouq (Cloudflare može trajati dugo)
+  const ctrl = new AbortController();
+  const tid  = setTimeout(() => ctrl.abort(), 90000);
+  try {
+    const r = await fetch(path, {...opts, signal: ctrl.signal});
+    return await r.json();
+  } finally {
+    clearTimeout(tid);
+  }
+}
+
+// ── Mode ───────────────────────────────────────────────────────────────────
+function setMode(mode) {
+  S.mode = mode;
+  document.getElementById('tab-parts').classList.toggle('active', mode==='parts');
+  document.getElementById('tab-pq').classList.toggle('active', mode==='pq');
+  document.getElementById('sidebar').style.display  = mode==='parts' ? '' : 'none';
+  document.getElementById('main').style.display     = mode==='parts' ? '' : 'none';
+  document.getElementById('pq-panel').style.display = mode==='pq'    ? '' : 'none';
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+(async () => {
+  setMain(ldr('Učitavam marke...'));
+  try {
+    const makes = await api('/api/makes');
+    const sel = document.getElementById('sel-make');
+    makes.forEach(m => sel.appendChild(new Option(m.name, m.id)));
+    setMain(emptyMsg());
+  } catch(e) { setMain(errMsg(e.message)); }
+})();
+
+// ── Make/Model/Type ────────────────────────────────────────────────────────
+async function onMakeChange() {
+  const sel = document.getElementById('sel-make');
+  S.makeId = sel.value; S.makeName = sel.options[sel.selectedIndex]?.text||'';
+  resetSel('sel-model','Model'); resetSel('sel-type','Tip');
+  S.modelId=''; S.vid='';
+  clearSidebar(); setMain(emptyMsg());
+  if (!sel.value) return;
+  sel.disabled=true; setMain(ldr('Modeli...'));
+  try {
+    const models = await api('/api/models?make_id='+encodeURIComponent(sel.value));
+    const ms = document.getElementById('sel-model');
+    ms.innerHTML='<option value="">-- Model --</option>';
+    models.forEach(m=>ms.appendChild(new Option(m.name+(m.years?' ('+m.years+')':''),m.id)));
+    ms.disabled=!models.length; setMain(emptyMsg());
+  } catch(e){ setMain(errMsg(e.message)); }
+  finally { sel.disabled=false; }
+}
+
+async function onModelChange() {
+  const ms = document.getElementById('sel-model');
+  S.modelId=ms.value; S.modelName=ms.options[ms.selectedIndex]?.text||'';
+  resetSel('sel-type','Tip'); S.vid='';
+  clearSidebar(); setMain(emptyMsg());
+  if (!ms.value) return;
+  ms.disabled=true; setMain(ldr('Tipovi...'));
+  try {
+    const types = await api('/api/types?make_id='+encodeURIComponent(S.makeId)+'&model_id='+encodeURIComponent(ms.value));
+    const ts = document.getElementById('sel-type');
+    ts.innerHTML='<option value="">-- Tip --</option>';
+    types.forEach(t=>ts.appendChild(new Option(t.details?`${t.name} | ${t.details}`:t.name, t.id)));
+    ts.disabled=!types.length; setMain(emptyMsg());
+  } catch(e){ setMain(errMsg(e.message)); }
+  finally { ms.disabled=false; }
+}
+
+async function onTypeChange() {
+  const ts = document.getElementById('sel-type');
+  S.vid=ts.value; S.vMfr=S.makeName;
+  S.vModel=S.modelName.replace(/ \(.*\)/,''); S.vType=ts.options[ts.selectedIndex]?.text?.split(' | ')[0]||'';
+  clearSidebar(); setMain(emptyMsg());
+  if (!ts.value) return;
+  setSidebarHtml(ldr('Kategorije...'));
+  try {
+    const cats = await api('/api/categories?vid='+encodeURIComponent(ts.value));
+    renderSidebar(cats); setMain(emptyMsg());
+  } catch(e){ setSidebarHtml(`<div class="sb-ph" style="color:var(--err)">${esc(e.message)}</div>`); }
+}
+
+// ── VIN all-in-one ─────────────────────────────────────────────────────────
+async function doVinAll() {
+  const vin = document.getElementById('vin-bar').value.trim();
+  if (!vin) return;
+
+  // Popuni partsouq polje i prebaci na taj tab
+  document.getElementById('pq-vin').value = vin;
+  setMode('pq');
+  pqSearchVin();
+}
+
+// ── Sidebar ────────────────────────────────────────────────────────────────
+const CAT_ICONS = {
+  kočn:'🛑',brak:'🛑',filtr:'🔵',ulje:'🟡',oil:'🟡',motor:'🔩',engine:'🔩',
+  klima:'❄',cool:'❄',hlađ:'❄',karos:'🚗',body:'🚗',elektr:'⚡',upravlj:'🎯',
+  steer:'🎯',osov:'🔗',axle:'🔗',točk:'⬤',tyre:'⬤',maziv:'🟡',goriv:'⛽',
+  fuel:'⛽',pranje:'💧',sijal:'💡',light:'💡',akum:'🔋',bat:'🔋',guma:'⬤',
+  amort:'🔧',suspen:'🔧',shock:'🔧',spring:'🔧',ovjes:'🔧'
+};
+function catIcon(n){ n=(n||'').toLowerCase(); for(const[k,v]of Object.entries(CAT_ICONS))if(n.includes(k))return v; return '🔧'; }
+
+function renderSidebar(cats){
+  if(!cats?.length){setSidebarHtml('<div class="sb-ph">Nema kategorija</div>');return;}
+  setSidebarHtml('<div class="sb-title">Kategorije</div>'+buildCatList(cats,0));
+}
+
+function buildCatList(cats,depth){
+  return cats.map((c,i)=>{
+    const hasKids=c.children?.length>0;
+    const id=`ci-${depth}-${i}`;
+    const allGa=collectGaIds(c);
+    return `
+      <div class="cat-item ${hasKids?'has-ch':''}" id="${id}"
+           onclick="catClick('${eAttr(c.id)}','${eAttr(c.name)}','${eAttr(allGa)}',this,${hasKids})">
+        <span class="cat-icon">${catIcon(c.name)}</span>${esc(c.name)}
+      </div>
+      ${hasKids?`<div class="cat-children" id="kids-${id}">${buildCatList(c.children,depth+1)}</div>`:''}
+    `;
+  }).join('');
+}
+
+function collectGaIds(cat){
+  const ids=new Set();
+  function walk(c){ if(c.belongedGaIds)c.belongedGaIds.split(',').forEach(id=>id.trim()&&ids.add(id.trim())); (c.children||[]).forEach(walk); }
+  walk(cat); return[...ids].join(',');
+}
+
+function catClick(catId,catName,allGaIds,el,hasKids){
+  if(hasKids){el.classList.toggle('open');const k=document.getElementById('kids-'+el.id);if(k)k.classList.toggle('open');}
+  document.querySelectorAll('.cat-item.active').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  if(catId&&S.vid) loadParts(catId,catName,allGaIds||'');
+}
+
+function clearSidebar(){ setSidebarHtml('<div class="sb-ph"><div style="font-size:28px;margin-bottom:6px">🚗</div>Odaberi vozilo</div>'); }
+
+// ── Parts ──────────────────────────────────────────────────────────────────
+async function loadParts(catId,catName,gaIds){
+  setMain(ldr(`${catName}...`));
+  try{
+    const url=`/api/parts?vid=${encodeURIComponent(S.vid)}&cat=${encodeURIComponent(catId)}&gaids=${encodeURIComponent(gaIds||'')}&mfr=${encodeURIComponent(S.vMfr)}&model=${encodeURIComponent(S.vModel)}&vtype=${encodeURIComponent(S.vType)}`;
+    const parts=await api(url); renderParts(parts,catName);
+  }catch(e){setMain(errMsg(e.message));}
+}
+
+function renderParts(parts,title){
+  if(!parts?.length){
+    setMain(`<div class="mhdr"><h2>${esc(title)}</h2></div>
+      <div class="empty"><div class="ico">🔍</div><h3>Nema dijelova</h3><p>Probaj podkategoriju</p></div>`);
+    return;
+  }
+  let html=`<div class="mhdr"><h2>${esc(title)}</h2><span class="rcnt">${parts.length} dijel${parts.length===1?'':'a'}</span></div><div class="pgrid">`;
+  parts.forEach(p=>{
+    const name=(p.name||'').trim()||'Nepoznat';
+    const brand=(p.brand||'').trim();
+    const artnr=(p.artnr||'').trim();
+    const img=(p.img||'').trim();
+    const oeList=p.oe_all||(p.oem?p.oem.split(', '):[]);
+    const oeHtml=oeList.slice(0,3).map(o=>`<span class="oem-chip" onclick="copyOem('${eAttr(o)}',this)">${esc(o)}</span>`).join('');
+    html+=`<div class="pcard">
+      ${img?`<img class="pimg" src="${eAttr(img)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:''}
+      <div class="pimg-ph" ${img?'style="display:none"':''}>🔩</div>
+      <div class="pinfo">
+        <div class="pname">${esc(name)}</div>
+        ${brand?`<div class="pbrand">${esc(brand)}</div>`:''}
+        ${artnr?`<div class="partnr">${esc(artnr)}</div>`:''}
+        ${oeList.length?`<div class="oem-wrap">${oeHtml}</div>`:''}
+        <div class="pactions">
+          ${oeList.length?`<button class="b-blue b-sm" onclick="openCiak('${eAttr(oeList[0])}')">CIAK →</button>`:''}
+          ${oeList.length?`<button class="b-ghost b-sm" onclick="copyOem('${eAttr(oeList[0])}',null)">Kopiraj</button>`:''}
+        </div>
+      </div>
+    </div>`;
+  });
+  html+='</div>'; setMain(html);
+}
+
+// ── Partsouq iframe (direktan, bez Playwright) ────────────────────────────
+function pqSearchVin(){
+  const vin = document.getElementById('pq-vin').value.trim();
+  if(!vin) return;
+  const url = 'https://partsouq.com/en/search/all?q=' + encodeURIComponent(vin);
+  pqLoadUrl(url);
+}
+
+function pqLoadUrl(url){
+  const frame = document.getElementById('pq-iframe');
+  const empty = document.getElementById('pq-empty-msg');
+  frame.src   = url;
+  frame.style.display = 'flex';
+  empty.style.display = 'none';
+  document.getElementById('pq-url').textContent = url.replace('https://partsouq.com','partsouq.com');
+  // Osvježi URL prikaz kad se iframe učita
+  frame.onload = () => {
+    try {
+      const u = frame.contentWindow.location.href;
+      document.getElementById('pq-url').textContent = u.replace('https://partsouq.com','');
+    } catch(e) { /* cross-origin */ }
+  };
+}
+
+function pqIframeBack(){
+  try { document.getElementById('pq-iframe').contentWindow.history.back(); } catch(e){}
+}
+function pqIframeRefresh(){
+  try { document.getElementById('pq-iframe').contentWindow.location.reload(); } catch(e) {
+    const f = document.getElementById('pq-iframe'); f.src = f.src;
+  }
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────
+function copyOem(oem,chip){
+  navigator.clipboard.writeText(oem).then(()=>{
+    if(chip){const o=chip.textContent;chip.classList.add('cp');chip.textContent='✓';setTimeout(()=>{chip.classList.remove('cp');chip.textContent=o;},1600);}
+    toast('OEM kopiran: '+oem);
+  });
+}
+function openCiak(oem){window.open('https://web1.carparts-cat.com/Login.aspx?11=328&14=25&214=0&12=1128','_blank');toast('Otvori CIAK i unesi: '+oem);}
+async function clearCache(){await fetch('/api/cache/clear',{method:'POST'});toast('Keš obrisan');}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function setMain(html){document.getElementById('main').innerHTML=html;}
+function setSidebarHtml(html){document.getElementById('sidebar').innerHTML=html;}
+function resetSel(id,label){const s=document.getElementById(id);s.innerHTML=`<option value="">-- ${label} --</option>`;s.disabled=true;}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function ldr(msg){return`<div class="loader"><div class="spin"></div><p>${esc(msg)}</p></div>`;}
+function errMsg(msg){return`<div class="alert-err">⚠ ${esc(msg)}</div>`;}
+function emptyMsg(){return`<div class="empty"><div class="ico">🔧</div><h3>Odaberi kategoriju</h3><p>Klikni na kategoriju za listu dijelova</p></div>`;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function eAttr(s){return String(s||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>
