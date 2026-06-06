@@ -133,27 +133,23 @@
     </div>
   </div>
 
-  <!-- Partsouq viewer — direktan iframe -->
+  <!-- Partsouq viewer — otvara u novom tabu -->
   <div class="pq-view" id="pq-panel" style="display:none;">
     <div class="pq-toolbar">
-      <button class="b-ghost b-sm" onclick="pqIframeBack()">← Nazad</button>
-      <button class="b-ghost b-sm" onclick="pqIframeRefresh()">↻</button>
-      <span class="pq-url" id="pq-url">partsouq.com</span>
+      <span class="pq-url">partsouq.com → otvara se u novom tabu</span>
       <div class="vin-input-wrap">
         <input type="text" id="pq-vin" placeholder="Ukucaj VIN/šasiju..."
                style="width:180px" onkeydown="if(event.key==='Enter')pqSearchVin()">
-        <button class="b-amber" onclick="pqSearchVin()">Traži</button>
+        <button class="b-amber" onclick="pqSearchVin()">Otvori →</button>
       </div>
     </div>
-    <div id="pq-empty-msg" style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--muted);padding:40px;gap:10px;">
-      <div style="font-size:42px">🖼️</div>
-      <h3 style="color:var(--txt);font-size:15px">OEM Dijagrami — Partsouq</h3>
-      <p style="font-size:12px">Unesi VIN/šasiju gore i pritisni <strong>Traži</strong></p>
-      <p style="font-size:11px;color:#60a5fa">Originalni OEM eksplodirani dijagrami sa klikabilnim dijelovima</p>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;color:var(--muted);padding:40px;gap:12px;">
+      <div style="font-size:48px">🖼️</div>
+      <h3 style="color:var(--txt);font-size:16px">OEM Dijagrami — Partsouq</h3>
+      <p style="font-size:13px">Unesi VIN ili šasiju i klikni <strong style="color:var(--acc)">Otvori →</strong></p>
+      <p style="font-size:11px;color:var(--muted)">Partsouq se otvara u novom tabu (blokira ugradnju u stranicu)</p>
+      <button class="b-amber" style="margin-top:8px;padding:8px 20px;font-size:13px" onclick="pqSearchVin()">Otvori Partsouq</button>
     </div>
-    <iframe id="pq-iframe" src="about:blank"
-            style="display:none;flex:1;border:none;background:#fff;"
-            allow="*" referrerpolicy="no-referrer-when-downgrade"></iframe>
   </div>
 
 </div>
@@ -353,37 +349,12 @@ function renderParts(parts,title){
   html+='</div>'; setMain(html);
 }
 
-// ── Partsouq iframe (direktan, bez Playwright) ────────────────────────────
+// ── Partsouq — otvara u novom tabu ────────────────────────────────────────
 function pqSearchVin(){
   const vin = document.getElementById('pq-vin').value.trim();
-  if(!vin) return;
+  if(!vin){ toast('Unesi VIN ili šasiju'); return; }
   const url = 'https://partsouq.com/en/search/all?q=' + encodeURIComponent(vin);
-  pqLoadUrl(url);
-}
-
-function pqLoadUrl(url){
-  const frame = document.getElementById('pq-iframe');
-  const empty = document.getElementById('pq-empty-msg');
-  frame.src   = url;
-  frame.style.display = 'flex';
-  empty.style.display = 'none';
-  document.getElementById('pq-url').textContent = url.replace('https://partsouq.com','partsouq.com');
-  // Osvježi URL prikaz kad se iframe učita
-  frame.onload = () => {
-    try {
-      const u = frame.contentWindow.location.href;
-      document.getElementById('pq-url').textContent = u.replace('https://partsouq.com','');
-    } catch(e) { /* cross-origin */ }
-  };
-}
-
-function pqIframeBack(){
-  try { document.getElementById('pq-iframe').contentWindow.history.back(); } catch(e){}
-}
-function pqIframeRefresh(){
-  try { document.getElementById('pq-iframe').contentWindow.location.reload(); } catch(e) {
-    const f = document.getElementById('pq-iframe'); f.src = f.src;
-  }
+  window.open(url, '_blank');
 }
 
 // ── Actions ────────────────────────────────────────────────────────────────
