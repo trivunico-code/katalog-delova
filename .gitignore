@@ -16,6 +16,9 @@ probe_*.py
 debug_*.py
 test_*.py
 probe_oauth.py
+deploy_render.py
+railway_deploy.py
+gh_auth.py
 wint_parts_*.json
 wint_parts_*.json
 flask_*.log
